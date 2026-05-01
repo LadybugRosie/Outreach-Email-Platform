@@ -1,0 +1,18 @@
+[project]
+name = "outreach-email-platform"
+version = "0.1.0"
+description = "Local-first outreach email automation with CLI and web UI."
+readme = "readme.md"
+requires-python = ">=3.10"
+dependencies = [
+  "flask>=3.0",
+  "keyring>=25.0",
+]
+
+[project.scripts]
+outreach = "outreach_app.cli:main"
+outreach-web = "outreach_app.web:main"
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"

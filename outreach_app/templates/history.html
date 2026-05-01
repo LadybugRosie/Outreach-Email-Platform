@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h1>Email History</h1>
+  <div class="table">
+    {% for log in logs %}
+      <div class="row">
+        <span>{{ log.sent_at }}</span>
+        <span>{{ log.to_email }}</span>
+        <span class="pill {{ log.status }}">{{ log.status }}</span>
+        <span>{{ log.error or log.subject }}</span>
+      </div>
+    {% else %}
+      <p>No email history yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

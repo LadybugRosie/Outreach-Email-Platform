@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Outreach Email Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="{{ url_for('index') }}">Outreach</a>
+      <nav>
+        <a href="{{ url_for('new_campaign') }}">New Campaign</a>
+        <a href="{{ url_for('smtp') }}">Email Account</a>
+        <a href="{{ url_for('send_history') }}">History</a>
+      </nav>
+    </header>
+    <main class="shell">
+      {% if error %}<div class="error">{{ error }}</div>{% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

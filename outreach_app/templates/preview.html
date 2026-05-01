@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <div class="split">
+    <div>
+      <p class="eyebrow">Preview</p>
+      <h1>{{ rendered.to_email }}</h1>
+    </div>
+    <form method="post" action="{{ url_for('send_recipient', recipient_id=rendered.recipient.id) }}">
+      <button class="button" type="submit">Confirm and Send</button>
+    </form>
+  </div>
+  <div class="email-preview">
+    <h2>{{ rendered.subject }}</h2>
+    <pre>{{ rendered.body }}</pre>
+  </div>
+</section>
+{% endblock %}

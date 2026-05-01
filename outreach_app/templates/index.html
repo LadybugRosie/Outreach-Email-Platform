@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">Local-first email outreach</p>
+    <h1>Prepare, preview, confirm, and send personalized outreach.</h1>
+  </div>
+  <a class="button" href="{{ url_for('new_campaign') }}">Create Campaign</a>
+</section>
+
+<section class="card">
+  <h2>Campaigns</h2>
+  {% if campaigns %}
+    <div class="table">
+      {% for campaign in campaigns %}
+        <a class="row" href="{{ url_for('campaign_detail', campaign_id=campaign.id) }}">
+          <span>{{ campaign.name }}</span>
+          <span>{{ campaign.sent_count or 0 }}/{{ campaign.recipient_count }} sent</span>
+          <span>{{ campaign.failed_count or 0 }} failed</span>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No campaigns yet. Create one from a template and recipient JSON file.</p>
+  {% endif %}
+</section>
+{% endblock %}

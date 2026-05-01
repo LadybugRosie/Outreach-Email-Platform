@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card narrow">
+  <h1>Connect Email</h1>
+  <p class="muted">The SMTP password is stored in your operating system keychain, not in SQLite.</p>
+  <form method="post" class="stack">
+    <label>From email <input name="email" type="email" required></label>
+    <label>SMTP host <input name="host" placeholder="smtp.gmail.com" required></label>
+    <label>SMTP port <input name="port" type="number" value="587" required></label>
+    <label>SMTP username <input name="username" required></label>
+    <label>SMTP password <input name="password" type="password" required></label>
+    <label class="check"><input name="use_tls" type="checkbox" checked> Use STARTTLS</label>
+    <button class="button" type="submit">Save Account</button>
+  </form>
+</section>
+{% endblock %}
