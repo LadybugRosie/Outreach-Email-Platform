@@ -1,0 +1,3 @@
+# What is this for?
+
+This is a platform for automating outreach emails. Simply modify the email template,...
