@@ -13,9 +13,8 @@ A small local-first application for personalized email outreach. It supports:
 ## Install
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .
+uv venv
+uv install -r pyproject.toml
 ```
 
 ## Recipient JSON Format
