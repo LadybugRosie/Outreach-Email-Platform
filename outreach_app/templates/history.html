@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="card">
-  <h1>Email History</h1>
+  <h1>Send log</h1>
   <div class="table">
     {% for log in logs %}
       <div class="row">
@@ -11,7 +11,7 @@
         <span>{{ log.error or log.subject }}</span>
       </div>
     {% else %}
-      <p>No email history yet.</p>
+      <p>No sent emails yet.</p>
     {% endfor %}
   </div>
 </section>

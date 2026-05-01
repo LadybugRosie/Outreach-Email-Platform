@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card narrow">
+  <h1>Gmail OAuth</h1>
+  <p class="muted">Upload a Google OAuth client JSON file, then approve Gmail send access.</p>
+  <form method="post" enctype="multipart/form-data" class="stack">
+    <label>Gmail address <input name="email" type="email" required></label>
+    <label>OAuth client JSON <input name="client_secret" type="file" accept=".json,application/json" required></label>
+    <button class="button" type="submit">Connect Gmail</button>
+  </form>
+</section>
+{% endblock %}

@@ -4,60 +4,58 @@ import json
 from pathlib import Path
 from typing import Any
 
-import keyring
-
 from .db import connect, init_db
-from .mailer import SMTPAccount
+from .mailer import GmailAccount, load_credentials, run_local_oauth, save_client_config
 from .rendering import render, required_fields
 
 
-KEYRING_SERVICE = "outreach-email-platform"
-
-
-def configure_smtp(
+def configure_gmail(
     email: str,
-    host: str,
-    port: int,
-    username: str,
-    password: str,
-    use_tls: bool = True,
+    client_config_json: str,
+    authorize_now: bool = False,
     db_path: str | None = None,
 ) -> None:
     init_db(db_path)
-    keyring.set_password(KEYRING_SERVICE, username, password)
+    save_client_config(client_config_json)
+    if authorize_now:
+        run_local_oauth(email)
     with connect(db_path) as conn:
         conn.execute(
             """
-            INSERT INTO smtp_accounts (id, email, host, port, username, use_tls, updated_at)
-            VALUES (1, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            INSERT INTO gmail_accounts (id, email, updated_at)
+            VALUES (1, ?, CURRENT_TIMESTAMP)
             ON CONFLICT(id) DO UPDATE SET
               email = excluded.email,
-              host = excluded.host,
-              port = excluded.port,
-              username = excluded.username,
-              use_tls = excluded.use_tls,
               updated_at = CURRENT_TIMESTAMP
             """,
-            (email, host, port, username, int(use_tls)),
+            (email,),
         )
 
 
-def get_smtp_account(db_path: str | None = None) -> SMTPAccount:
+def save_gmail_account(email: str, db_path: str | None = None) -> None:
     init_db(db_path)
     with connect(db_path) as conn:
-        row = conn.execute("SELECT * FROM smtp_accounts WHERE id = 1").fetchone()
+        conn.execute(
+            """
+            INSERT INTO gmail_accounts (id, email, updated_at)
+            VALUES (1, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(id) DO UPDATE SET
+              email = excluded.email,
+              updated_at = CURRENT_TIMESTAMP
+            """,
+            (email,),
+        )
+
+
+def get_gmail_account(db_path: str | None = None) -> GmailAccount:
+    init_db(db_path)
+    with connect(db_path) as conn:
+        row = conn.execute("SELECT * FROM gmail_accounts WHERE id = 1").fetchone()
     if row is None:
-        raise RuntimeError("SMTP account is not configured")
-    password = keyring.get_password(KEYRING_SERVICE, row["username"])
-    if not password:
-        raise RuntimeError("SMTP password was not found in the OS keychain")
-    return SMTPAccount(
+        raise RuntimeError("Gmail account is not connected")
+    return GmailAccount(
         email=row["email"],
-        host=row["host"],
-        port=int(row["port"]),
-        username=row["username"],
-        use_tls=bool(row["use_tls"]),
-        password=password,
+        credentials=load_credentials(row["email"]),
     )
 
 

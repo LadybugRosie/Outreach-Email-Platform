@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="card">
-  <h1>New Campaign</h1>
-  <p class="muted">Use fields like {Club Name}. Recipient JSON keys can use the same names.</p>
+  <h1>New batch</h1>
+  <p class="muted">Write one template. Use fields like {Club Name}. Upload JSON recipients.</p>
   <form method="post" enctype="multipart/form-data" class="stack">
-    <label>Campaign name <input name="name" required></label>
-    <label>Subject template <input name="subject_template" placeholder="Partnership with {Club Name}" required></label>
+    <label>Batch name <input name="name" required></label>
+    <label>Subject <input name="subject_template" placeholder="Hello {Club Name}" required></label>
     <label>Body template <textarea name="body_template" rows="12" required></textarea></label>
-    <label>Recipient JSON <input name="recipients" type="file" accept=".json,application/json" required></label>
-    <button class="button" type="submit">Create Campaign</button>
+    <label>Recipients JSON <input name="recipients" type="file" accept=".json,application/json" required></label>
+    <button class="button" type="submit">Create batch</button>
   </form>
 </section>
 {% endblock %}

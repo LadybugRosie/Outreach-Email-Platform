@@ -1,0 +1,25 @@
+{
+  "recipients": [
+    {
+      "email": "kz1726@princeton.edu",
+      "Club Name": "Northside Rowing",
+      "Contact Name": "Alex",
+      "School": "Northside High School",
+      "City": "Austin"
+    },
+    {
+      "email": "kz1726@princeton.edu",
+      "Club Name": "Blue Harbor Debate",
+      "Contact Name": "Maya",
+      "School": "Blue Harbor Academy",
+      "City": "Boston"
+    },
+    {
+      "email": "kz1726@princeton.edu",
+      "Club Name": "Westview Robotics",
+      "Contact Name": "Jordan",
+      "School": "Westview Prep",
+      "City": "San Diego"
+    }
+  ]
+}

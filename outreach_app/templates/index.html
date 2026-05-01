@@ -2,14 +2,14 @@
 {% block content %}
 <section class="hero">
   <div>
-    <p class="eyebrow">Local-first email outreach</p>
-    <h1>Prepare, preview, confirm, and send personalized outreach.</h1>
+    <p class="eyebrow">Template email sender</p>
+    <h1>Send one email template to many recipients.</h1>
   </div>
-  <a class="button" href="{{ url_for('new_campaign') }}">Create Campaign</a>
+  <a class="button" href="{{ url_for('new_campaign') }}">New batch</a>
 </section>
 
 <section class="card">
-  <h2>Campaigns</h2>
+  <h2>Batches</h2>
   {% if campaigns %}
     <div class="table">
       {% for campaign in campaigns %}
@@ -21,7 +21,7 @@
       {% endfor %}
     </div>
   {% else %}
-    <p>No campaigns yet. Create one from a template and recipient JSON file.</p>
+    <p>No batches yet. Add a template and a JSON recipient list.</p>
   {% endif %}
 </section>
 {% endblock %}

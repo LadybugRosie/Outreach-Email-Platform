@@ -1,15 +1,14 @@
 from __future__ import annotations
 
 import argparse
-import getpass
 import sys
 
 from .db import init_db
-from .mailer import send_email
+from .mailer import run_local_oauth, send_email
 from .store import (
-    configure_smtp,
+    configure_gmail,
     create_campaign,
-    get_smtp_account,
+    get_gmail_account,
     history,
     list_campaigns,
     list_recipients,
@@ -26,12 +25,9 @@ def main(argv: list[str] | None = None) -> int:
 
     subparsers.add_parser("init", help="Initialize the local database")
 
-    smtp_parser = subparsers.add_parser("smtp-config", help="Save SMTP settings and password")
-    smtp_parser.add_argument("--email", required=True)
-    smtp_parser.add_argument("--host", required=True)
-    smtp_parser.add_argument("--port", type=int, default=587)
-    smtp_parser.add_argument("--username", required=True)
-    smtp_parser.add_argument("--no-tls", action="store_true")
+    gmail_parser = subparsers.add_parser("gmail-connect", help="Connect a Gmail account with OAuth")
+    gmail_parser.add_argument("--email", required=True)
+    gmail_parser.add_argument("--client-secret", required=True, help="Path to Google OAuth client JSON")
 
     campaign_parser = subparsers.add_parser("campaign-create", help="Create a campaign from templates and JSON")
     campaign_parser.add_argument("--name", required=True)
@@ -62,10 +58,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "init":
         print(f"Initialized {init_db(args.db)}")
         return 0
-    if args.command == "smtp-config":
-        password = getpass.getpass("SMTP password: ")
-        configure_smtp(args.email, args.host, args.port, args.username, password, not args.no_tls, args.db)
-        print("SMTP account saved")
+    if args.command == "gmail-connect":
+        client_config_json = _read_text(args.client_secret)
+        configure_gmail(args.email, client_config_json, authorize_now=False, db_path=args.db)
+        run_local_oauth(args.email)
+        print("Gmail account connected")
         return 0
     if args.command == "campaign-create":
         body = _read_text(args.body_file)
@@ -102,7 +99,7 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _send_campaign(campaign_id: int, limit: int | None, yes: bool, retry_failed: bool, db_path: str | None) -> int:
-    account = get_smtp_account(db_path)
+    account = get_gmail_account(db_path)
     statuses = ["pending", "failed"] if retry_failed else ["pending"]
     recipients = []
     for status in statuses:

@@ -3,16 +3,16 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Outreach Email Platform</title>
+    <title>Mass Template Email Sender</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="{{ url_for('index') }}">Outreach</a>
+      <a class="brand" href="{{ url_for('index') }}">Mass Template Email Sender</a>
       <nav>
-        <a href="{{ url_for('new_campaign') }}">New Campaign</a>
-        <a href="{{ url_for('smtp') }}">Email Account</a>
-        <a href="{{ url_for('send_history') }}">History</a>
+        <a href="{{ url_for('new_campaign') }}">New Batch</a>
+        <a href="{{ url_for('gmail') }}">Gmail</a>
+        <a href="{{ url_for('send_history') }}">Log</a>
       </nav>
     </header>
     <main class="shell">

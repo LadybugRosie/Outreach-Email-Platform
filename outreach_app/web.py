@@ -1,52 +1,75 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
+from secrets import token_urlsafe
 from tempfile import NamedTemporaryFile
 
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, session, url_for
 
 from .db import DB_PATH, init_db
-from .mailer import send_email
+from .mailer import make_web_flow, save_client_config, save_token, send_email
 from .store import (
-    configure_smtp,
     create_campaign,
-    get_smtp_account,
+    get_gmail_account,
     history,
     list_campaigns,
     list_recipients,
     mark_send_failure,
     mark_send_success,
     preview_email,
+    save_gmail_account,
 )
 
 
 def create_app(db_path: str | None = None) -> Flask:
     app = Flask(__name__)
     app.config["DB_PATH"] = db_path
+    app.secret_key = os.environ.get("FLASK_SECRET_KEY", "local-dev-only-change-me")
+    os.environ.setdefault("OAUTHLIB_INSECURE_TRANSPORT", "1")
     init_db(db_path)
 
     @app.get("/")
     def index():
         return render_template("index.html", campaigns=list_campaigns(app.config["DB_PATH"]), db_path=DB_PATH)
 
-    @app.route("/smtp", methods=["GET", "POST"])
-    def smtp():
+    @app.route("/gmail", methods=["GET", "POST"])
+    def gmail():
         error = None
         if request.method == "POST":
             try:
-                configure_smtp(
-                    request.form["email"],
-                    request.form["host"],
-                    int(request.form["port"]),
-                    request.form["username"],
-                    request.form["password"],
-                    request.form.get("use_tls") == "on",
-                    app.config["DB_PATH"],
+                upload = request.files.get("client_secret")
+                if upload is None or not upload.filename:
+                    raise ValueError("Upload a Google OAuth client JSON file")
+                client_config_json = upload.read().decode("utf-8")
+                save_client_config(client_config_json)
+                session["gmail_email"] = request.form["email"]
+                session["oauth_state"] = token_urlsafe(24)
+                flow = make_web_flow(url_for("gmail_callback", _external=True), session["oauth_state"])
+                auth_url, state = flow.authorization_url(
+                    access_type="offline",
+                    include_granted_scopes="true",
+                    prompt="consent",
                 )
-                return redirect(url_for("index"))
+                session["oauth_state"] = state
+                return redirect(auth_url)
             except Exception as exc:
                 error = str(exc)
-        return render_template("smtp.html", error=error)
+        return render_template("gmail.html", error=error)
+
+    @app.get("/gmail/callback")
+    def gmail_callback():
+        email = session.get("gmail_email")
+        state = session.get("oauth_state")
+        if not email or not state:
+            return redirect(url_for("gmail"))
+        flow = make_web_flow(url_for("gmail_callback", _external=True), state)
+        flow.fetch_token(authorization_response=request.url)
+        save_token(email, flow.credentials)
+        save_gmail_account(email, app.config["DB_PATH"])
+        session.pop("gmail_email", None)
+        session.pop("oauth_state", None)
+        return redirect(url_for("index"))
 
     @app.route("/campaigns/new", methods=["GET", "POST"])
     def new_campaign():
@@ -98,7 +121,7 @@ def create_app(db_path: str | None = None) -> Flask:
     def send_recipient(recipient_id: int):
         rendered = preview_email(recipient_id, app.config["DB_PATH"])
         try:
-            account = get_smtp_account(app.config["DB_PATH"])
+            account = get_gmail_account(app.config["DB_PATH"])
             send_email(account, rendered["to_email"], rendered["subject"], rendered["body"])
             mark_send_success(recipient_id, rendered["subject"], rendered["body"], app.config["DB_PATH"])
         except Exception as exc:
@@ -109,7 +132,7 @@ def create_app(db_path: str | None = None) -> Flask:
     def send_batch(campaign_id: int):
         limit = int(request.form.get("limit") or 10)
         recipients = list_recipients(campaign_id, "pending", app.config["DB_PATH"])[:limit]
-        account = get_smtp_account(app.config["DB_PATH"])
+        account = get_gmail_account(app.config["DB_PATH"])
         for recipient in recipients:
             rendered = preview_email(recipient["id"], app.config["DB_PATH"])
             try:

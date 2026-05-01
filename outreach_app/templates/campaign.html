@@ -2,10 +2,10 @@
 {% block content %}
 <section class="card">
   <div class="split">
-    <h1>Campaign {{ campaign_id }}</h1>
+    <h1>Batch {{ campaign_id }}</h1>
     <form method="post" action="{{ url_for('send_batch', campaign_id=campaign_id) }}" class="inline">
       <input name="limit" type="number" min="1" value="10">
-      <button class="button" type="submit">Send Pending Batch</button>
+      <button class="button" type="submit">Send pending</button>
     </form>
   </div>
   <div class="filters">
@@ -22,7 +22,7 @@
         <span>{{ recipient.last_error or "" }}</span>
       </a>
     {% else %}
-      <p>No recipients match this filter.</p>
+      <p>No recipients match.</p>
     {% endfor %}
   </div>
 </section>
